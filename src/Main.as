@@ -3,22 +3,29 @@ package {
 	import flash.display.Loader;
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
+	import flash.display.StageAlign;
+	import flash.display.StageScaleMode;
 	import flash.events.Event;
+	import flash.events.MouseEvent;
 	import flash.geom.Matrix;
 	import flash.net.FileReference;
 	import flash.net.URLRequest;
+	import flash.system.LoaderContext;
+	import flash.text.TextField;
+	import flash.text.TextFieldAutoSize;
+	import flash.text.TextFieldType;
+	import flash.text.TextFormat;
 	import flash.utils.ByteArray;
 	
 	
-	[SWF(width='768',height='500',frameRate="60")]
+	[SWF(width='500',height='300', backgroundColor="0xe1e1e1", frameRate="60")]
 	
 	public class Main extends Sprite {
 		
 		[Embed(source="../lib/movieBytes",mimeType="application/octet-stream")]
 		private const movieBytes:Class;
 		
-		static private const SWF_URL:String = "test.swf";
-		static private const MOVIE_NAME:String = "movie";
+		static private var MOVIE_NAME:String;
 		
 		static private var DATA:ByteArray;
 		
@@ -31,31 +38,225 @@ package {
 			
 			
 			// init parser
-			load();
-		
+			//load();
+			
+			this.addChild( createDisplay() );
+			
+			stage.align = StageAlign.TOP_LEFT;
+			stage.scaleMode = StageScaleMode.NO_SCALE;
+			
+			stage.addEventListener(MouseEvent.MOUSE_UP, function():void{
+				loadBtnLabel.y = encodeBtnLabel.y = 0;
+			});
+			
+			stage.addEventListener(Event.RESIZE, function():void { 
+				output.width = stage.stageWidth - output.x  - 20;
+				output.height = stage.stageHeight - output.y  - 20;
+			});
+			
+			
+			
 		}
 		
-		private function load():void {
-			var loader:Loader = new Loader();
-			loader.contentLoaderInfo.addEventListener(Event.COMPLETE, loaderComplete);
-			loader.load(new URLRequest(SWF_URL));
+		// display
+		private var display:Sprite;
+		private function createDisplay():Sprite {
+			display = new Sprite();
+			display.addChild( createLoadBtn() );	
+			display.addChild( createMovieNameInput() );	
+			display.addChild( createEncodeBtn() );
+			display.addChild( createOutput() );
+			
+			return display;
 		}
+
+		
+		
+		private var loadBtn:Sprite;
+		private var loadBtnLabel:TextField;
+		
+		
+		private function createLoadBtn():Sprite {
+			loadBtn = new Sprite();
+			
+			loadBtnLabel = new TextField();
+			
+			loadBtnLabel.defaultTextFormat = new TextFormat("Arial", 12, null, null, null, null, null, null, "center");
+			loadBtnLabel.text = "LOAD SWF";
+			loadBtnLabel.width = 160;
+			loadBtnLabel.height = 20;			 
+			loadBtnLabel.border = loadBtnLabel.background = true;
+			loadBtnLabel.backgroundColor = 0xffffff;
+			loadBtnLabel.mouseEnabled = loadBtnLabel.selectable = false;		
+			
+			loadBtn.addChild(loadBtnLabel);
+			loadBtn.buttonMode = true;
+			loadBtn.addEventListener(MouseEvent.MOUSE_DOWN, function():void{
+				loadBtnLabel.y = 2;				
+				load();								
+			});
+			
+			loadBtn.x = 20;
+			loadBtn.y = 20;
+			
+			
+			return loadBtn;
+		}
+		
+		
+		
+		
+		private var movieNameInput:TextField;
+		private var movieNameInputContainer:Sprite;
+		
+		private function createMovieNameInput():Sprite {
+			
+			movieNameInputContainer = new Sprite();
+			
+			var label:TextField = new TextField();
+			label.autoSize = TextFieldAutoSize.LEFT;
+			label.defaultTextFormat = new TextFormat("Arial", 12, null, null, null, null, null, null, "center");
+			label.mouseEnabled = label.selectable = false;
+			label.text = "MovieClip name to encode:"
+			
+			movieNameInput = new TextField();			
+			movieNameInput.type = TextFieldType.INPUT;
+			movieNameInput.border = movieNameInput.background = true;
+			movieNameInput.backgroundColor = 0xf1f1f1;
+			movieNameInput.y = label.height;
+			movieNameInput.width = 160;
+			movieNameInput.height = 20;
+			
+			
+			movieNameInput.addEventListener(Event.CHANGE, function():void{
+				MOVIE_NAME = movieNameInput.text;
+			});
+			
+			
+			movieNameInputContainer.addChild(label); 
+			movieNameInputContainer.addChild(movieNameInput); 
+			
+			movieNameInputContainer.x = 20;
+			movieNameInputContainer.y = 80;
+			
+			return movieNameInputContainer;
+		}
+		
+		
+		private var encodeBtn:Sprite;
+		private var encodeBtnLabel:TextField;
 		
 		private var swf:MovieClip;
 		
+		private function createEncodeBtn():Sprite {
+			encodeBtn = new Sprite();
+			
+			encodeBtnLabel = new TextField();
+			
+			encodeBtnLabel.defaultTextFormat = new TextFormat("Arial", 12, null, null, null, null, null, null, "center");
+			encodeBtnLabel.text = "ENCODE MOVIE";
+			encodeBtnLabel.width = 160;
+			encodeBtnLabel.height = 20;			 
+			encodeBtnLabel.border = encodeBtnLabel.background = true;
+			encodeBtnLabel.backgroundColor = 0xffffff;
+			encodeBtnLabel.mouseEnabled = encodeBtnLabel.selectable = false;	
+			
+			encodeBtn.addChild(encodeBtnLabel);
+			encodeBtn.buttonMode = true;
+			encodeBtn.addEventListener(MouseEvent.MOUSE_DOWN, function():void{
+				encodeBtnLabel.y = 2;	
+				
+				//trace("Enconding movie:", MOVIE_NAME, "...");
+				output.appendText("\n---------------------------------------------" );
+				output.appendText("\nEnconding movie: " +  MOVIE_NAME+ " ...\n" );
+				
+				var clazz:Object = loader.content.loaderInfo.applicationDomain.getDefinition(MOVIE_NAME);
+				swf = new clazz() as MovieClip;		
+				encode(swf);
+				
+				printHeader(DATA);
+				//printObjects(DATA, 1);
+				
+				save(DATA);
+				
+			});
+			
+			encodeBtn.x = 20;
+			encodeBtn.y = 125;
+			
+			
+			return encodeBtn;
+		}
+		
+		
+		
+		
+		
+		
+		private var output:TextField
+		private function createOutput():TextField {
+			output = new TextField();			
+			output.border = output.background = true;
+			output.backgroundColor = 0xffffff;
+			
+			output.x = 200;
+			output.y = 20;
+			
+			
+			return output;
+		}
+		
+		
+		
+		
+		private var loader:Loader;
+		
+		private function load():void {			
+			var file:FileReference = new FileReference();
+			file.browse();
+			file.addEventListener(Event.SELECT, function(e:Event):void { 
+				loadBtnLabel.y = 0;				
+				
+				file.load();
+				file.addEventListener(Event.COMPLETE, function():void{
+					loader = new Loader();
+					loader.contentLoaderInfo.addEventListener(Event.COMPLETE, loaderComplete);
+					var lc:LoaderContext = new LoaderContext();
+					lc.allowCodeImport = true;
+					loader.loadBytes(file.data, lc);	
+				});
+			});			
+		}
+		
+		
+		
 		private function loaderComplete(e:Event):void {
-			var clazz:Class = e.target.content.loaderInfo.applicationDomain.getDefinition(MOVIE_NAME);
-			swf = new clazz() as MovieClip;
 			
-			encode(swf);
+			output.text = "\nMovieClip Definition Names:\n";	
 			
-			// utils
-			//printHeader(DATA);
-			//printObjects(DATA, 1);
+			const dList:Vector.<String> = loader.content.loaderInfo.applicationDomain.getQualifiedDefinitionNames();			
+			var i:uint = 0, //
+				len:uint = dList.length, //
+				clazz:Class, //
+				dname:String;
 			
-			save(DATA);
+			
+			for (; i < len; i++ ) {
+				dname = dList[i];
+				clazz = e.target.content.loaderInfo.applicationDomain.getDefinition(dname);
+				if(new clazz() is MovieClip ) {
+					output.appendText("\n"+dname);
+				}
+			}
+			
 		
 		}
+		
+		
+		
+		
+		
+		
 		
 		private function getProps(movie:Object):Object {
 			const s:String = String(movie.bitmapData).slice(8, String(movie.bitmapData).length - 1);
@@ -219,7 +420,7 @@ package {
 			bytes.position = 0;
 			bytes.deflate();
 			var file:FileReference = new FileReference();
-			file.save(bytes);
+			file.save(bytes, "movieBytes");
 		}
 		
 		// get movie
@@ -466,24 +667,33 @@ package {
 			bytes.position = 0;
 			
 			var numTextures:int = bytes.readInt();
-			trace("numTextures", numTextures);
+			//trace("numTextures", numTextures);
+			output.appendText("\nnumTextures " + numTextures + "\n");
 			while (numTextures--) {
-				trace(bytes.readUTF(), bytes.readUnsignedInt());
+				//trace(bytes.readUTF(), bytes.readUnsignedInt());
+				output.appendText( bytes.readUTF() + " " + bytes.readUnsignedInt() +"\n");
 			}
 			
 			const headerLen:uint = bytes.readUnsignedInt();
-			trace("\ntotalFrames:", bytes.readInt());
+			//trace("\ntotalFrames:", bytes.readInt());
+			output.appendText("\ntotalFrames: " + bytes.readInt());
 			var frameCount:uint = 0;
 			while (bytes.position < headerLen) {
-				trace("frame:", ++frameCount, //
-					", props range:", bytes.readUnsignedInt(), "-", bytes.readUnsignedInt(), //
-					", numObjects:", bytes.readUnsignedInt() //
+				//trace("frame:", ++frameCount, //
+					//", props range:", bytes.readUnsignedInt(), "-", bytes.readUnsignedInt(), //
+					//", numObjects:", bytes.readUnsignedInt() //
+					//);
+					
+				output.appendText("\nframe: " + ++frameCount //
+					+" props range: "+ bytes.readUnsignedInt() + " - " + bytes.readUnsignedInt() //
+					+", numObjects: " + bytes.readUnsignedInt() //
 					);
 			}
 		}
 		
 		private function printObjects(bytes:ByteArray, frame:int):void {
-			trace("\nframe", frame);
+			//trace("\nframe", frame);
+			output.appendText("\n\nframe " + frame);
 			var start:uint, end:uint;
 			bytes.position = 0;
 			var numTextures:int = bytes.readInt();
@@ -508,14 +718,23 @@ package {
 			}
 			bytes.position = start;
 			while (bytes.position < end) {
-				trace("name", bytes.readUTF());
-				trace("alpha", bytes.readDouble());
-				trace("a", bytes.readDouble());
-				trace("b", bytes.readDouble());
-				trace("c", bytes.readDouble());
-				trace("d", bytes.readDouble());
-				trace("tx", bytes.readDouble());
-				trace("ty", bytes.readDouble());
+				//trace("name", bytes.readUTF());
+				//trace("alpha", bytes.readDouble());
+				//trace("a", bytes.readDouble());
+				//trace("b", bytes.readDouble());
+				//trace("c", bytes.readDouble());
+				//trace("d", bytes.readDouble());
+				//trace("tx", bytes.readDouble());
+				//trace("ty", bytes.readDouble());
+				
+				output.appendText("\nname " + bytes.readUTF());
+				output.appendText("\nalpha " + bytes.readDouble());
+				output.appendText("\na " + bytes.readDouble());
+				output.appendText("\nb " + bytes.readDouble());
+				output.appendText("\nc " + bytes.readDouble());
+				output.appendText("\nd "+ bytes.readDouble());
+				output.appendText("\ntx "+ bytes.readDouble());
+				output.appendText("nty "+ bytes.readDouble());
 			}
 		}
 	

@@ -55,7 +55,6 @@ package {
 			});
 			
 			
-			
 		}
 		
 		// display
@@ -242,7 +241,7 @@ package {
 			
 			
 			for (; i < len; i++ ) {
-				dname = dList[i];
+				dname = dList[i]; 
 				clazz = e.target.content.loaderInfo.applicationDomain.getDefinition(dname);
 				if(new clazz() is MovieClip ) {
 					output.appendText("\n"+dname);
@@ -260,11 +259,16 @@ package {
 		
 		private function getProps(movie:Object):Object {
 			const s:String = String(movie.bitmapData).slice(8, String(movie.bitmapData).length - 1);
-			var objResult:Object = {name: s, alpha: 1.0, matrix: new Matrix()};
+			//var objResult:Object = {name: s, alpha: 1.0, matrix: new Matrix()};
+			var objResult:Object = {name: s, alpha: 1.0, matrix: new Matrix(), index: 0};
 			function step(movie:Object):void {
 				objResult.alpha *= movie.alpha;
-				objResult.matrix.concat(movie.transform.matrix);
+				objResult.matrix.concat(movie.transform.matrix);				
 				if (movie.parent) {
+					
+					//TODO to test
+					objResult.index += movie.parent.getChildIndex(movie); 
+					
 					step(movie.parent);
 				}
 			}
@@ -276,7 +280,10 @@ package {
 		private var childPropsList:Vector.<Object> = new <Object>[];
 		
 		private function getChild(movie:Object):void {
-			var i:uint = 0, nc:uint = movie.numChildren, temp:Object, tData:Object;
+			var i:uint = 0, //
+				nc:uint = movie.numChildren, //
+				temp:Object, //
+				tData:Object;
 			for (; i < nc; i++) {
 				temp = movie.getChildAt(i);
 				if (temp.hasOwnProperty("numChildren")) {
@@ -286,10 +293,15 @@ package {
 					childPropsList.push({ //
 							name: tData.name, //
 							alpha: tData.alpha, //
-							matrix: tData.matrix //
+							matrix: tData.matrix,  //
+							
+							//TODO to test
+							index: tData.index  //
+							
 						});
 				}
 			}
+			
 			if (movie.currentFrame == movie.totalFrames) {
 				movie.gotoAndStop(1);
 			} else
@@ -337,7 +349,7 @@ package {
 					tname = childPropTemp.name;
 					registerNewFlag = true;
 					
-					//trace(childPropTemp.name, childPropTemp.alpha, childPropTemp.matrix);
+					//trace(childPropTemp.name, childPropTemp.alpha, childPropTemp.matrix, childPropTemp.index);	 				
 					
 					// register textures at this frame
 					frameRegister.position = 0;
@@ -364,6 +376,9 @@ package {
 					props.writeDouble(childPropTemp.matrix.d);
 					props.writeDouble(childPropTemp.matrix.tx);
 					props.writeDouble(childPropTemp.matrix.ty);
+					
+					//TODO to test
+					props.writeUnsignedInt(childPropTemp.index);
 					
 				}
 				
@@ -674,7 +689,7 @@ package {
 				output.appendText( bytes.readUTF() + " " + bytes.readUnsignedInt() +"\n");
 			}
 			
-			const headerLen:uint = bytes.readUnsignedInt();
+			const headerLen:uint = bytes.readUnsignedInt() + 8;
 			//trace("\ntotalFrames:", bytes.readInt());
 			output.appendText("\ntotalFrames: " + bytes.readInt());
 			var frameCount:uint = 0;
@@ -734,7 +749,11 @@ package {
 				output.appendText("\nc " + bytes.readDouble());
 				output.appendText("\nd "+ bytes.readDouble());
 				output.appendText("\ntx "+ bytes.readDouble());
-				output.appendText("nty "+ bytes.readDouble());
+				output.appendText("nty " + bytes.readDouble());
+				
+				//TODO to test
+				output.appendText("nindex "+ bytes.readUnsignedInt()); 
+				
 			}
 		}
 	

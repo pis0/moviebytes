@@ -263,7 +263,7 @@ package {
 			var objResult:Object = {name: s, alpha: 1.0, matrix: new Matrix(), index: 0};
 			function step(movie:Object):void {
 				objResult.alpha *= movie.alpha;
-				objResult.matrix.concat(movie.transform.matrix);				
+				objResult.matrix.concat(movie.transform.matrix);
 				if (movie.parent) {
 					
 					//TODO to test
@@ -749,10 +749,10 @@ package {
 				output.appendText("\nc " + bytes.readDouble());
 				output.appendText("\nd "+ bytes.readDouble());
 				output.appendText("\ntx "+ bytes.readDouble());
-				output.appendText("nty " + bytes.readDouble());
+				output.appendText("\nty " + bytes.readDouble());
 				
 				//TODO to test
-				output.appendText("nindex "+ bytes.readUnsignedInt()); 
+				output.appendText("\nindex "+ bytes.readUnsignedInt()); 
 				
 			}
 		}

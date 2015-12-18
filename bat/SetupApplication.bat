@@ -8,6 +8,7 @@
 
 :: Your certificate information
 set CERT_NAME="movieParser"
+:: set CERT_NAME="fix"
 set CERT_PASS=fd
 set CERT_FILE="bat\movieParser.p12"
 set SIGNING_OPTIONS=-storetype pkcs12 -keystore %CERT_FILE% -storepass %CERT_PASS%
@@ -26,6 +27,7 @@ set APP_ID=%APP_ID: =%
 :: Output
 set AIR_PATH=air
 set AIR_NAME=movieParser
+::set AIR_NAME=fix
 
 
 :validation

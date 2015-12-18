@@ -122,6 +122,19 @@ package
 		
 		private function fix():void
 		{
+			
+			
+			//output.appendText("\nChecking...");  
+			//if (check()) 
+			//{
+				//output.appendText("\nOK!");  
+				//return; 
+			//}
+			
+			//trace("ERROR! (fixing...)");  	
+			output.appendText("\nERROR! (fixing...)");  	
+			
+			
 			input.position = 0;
 			
 			//
@@ -156,7 +169,6 @@ package
 			output.appendText("\n\ntotalFrames " + totalFrames); 			
 			
 			//			
-			var errorFlag:Boolean = false; 
 			var tempProps:ByteArray = new ByteArray(); 
 			var tempHeader:ByteArray = new ByteArray(); 
 			
@@ -175,34 +187,6 @@ package
 				
 				pointer = input.position;
 				
-				//
-				try
-				{
-					input.position = start + headerLen;			
-					while (input.position < end + headerLen) 
-					{										
-						input.readUTF();
-						input.readDouble();				
-						input.readDouble();
-						input.readDouble();
-						input.readDouble();
-						input.readDouble();
-						input.readDouble();
-						input.readDouble();				
-						input.readUnsignedInt(); 
-					}
-					
-					//trace("OK!\n"); 
-					output.appendText("\nOK!\n"); 
-					
-				}
-				catch (err:Error)			
-				{
-					errorFlag = true;
-					
-					//trace("ERROR! (fixing...)");  	
-					output.appendText("\nERROR! (fixing...)");  	
-					
 					var objCounter:uint = 0;
 					
 					tempHeader.writeUnsignedInt(tempProps.position); 
@@ -226,18 +210,13 @@ package
 					tempHeader.writeUnsignedInt(tempProps.position); 
 					tempHeader.writeUnsignedInt(objCounter); 					
 					
-					//trace("FIXED!\n");
-					output.appendText("\nFIXED!\n"); 
-				}			
 				
 				
 				input.position = pointer; 
 				
 			} 
 			
-			
-			if (errorFlag)
-			{				
+				
 				input.position = 0;
 				input.readInt();
 				while (numTextures--) 
@@ -252,8 +231,12 @@ package
 				input.position = headerLen;		 				
 				input.writeBytes(tempProps, 0, tempProps.length); 	
 				
+				
+				//trace("FIXED!\n");
+				output.appendText("\nFIXED!\n"); 
+				
 				save(input); 
-			}
+			
 			
 			
 			
@@ -261,6 +244,74 @@ package
 			
 			
 		}
+		
+		
+		
+		//private function check():Boolean
+		//{
+			//input.position = 0;
+			//
+			////
+			//var numTextures:int = input.readInt();
+			//
+			////
+			//var i:int = 0;
+			//var tname:String;
+			//var tlen:uint;
+			//for (; i < numTextures; i++)
+			//{
+				//tname = input.readUTF();
+				//tlen = input.readUnsignedInt();			
+			//}
+			//
+			////
+			//var headerLen:uint = input.readUnsignedInt() + 8;
+			//
+			////
+			//var totalFrames:int = input.readInt();			
+			//
+			////			
+			//var tempProps:ByteArray = new ByteArray(); 
+			//var tempHeader:ByteArray = new ByteArray(); 
+			//
+			//var frameCount:uint = 0;
+			//var pointer:uint; 
+			//while (input.position < headerLen)
+			//{
+				//
+				//var start:uint = input.readUnsignedInt();
+				//var end:uint = input.readUnsignedInt();
+				//var numObjects:uint = input.readUnsignedInt();				
+				//
+				//pointer = input.position;
+				//
+				////
+				//try
+				//{
+					//input.position = start + headerLen;			
+					//while (input.position < end + headerLen) 
+					//{										
+						//input.readUTF();
+						//input.readDouble();				
+						//input.readDouble();
+						//input.readDouble();
+						//input.readDouble();
+						//input.readDouble();
+						//input.readDouble();
+						//input.readDouble();				
+						//input.readUnsignedInt(); 
+					//}					
+				//}
+				//catch (err:Error)			
+				//{
+					//trace("PLAU!");
+					//return false;
+				//}
+			//}
+			//
+			//
+			//return true;
+		//}
 		
 		
 		

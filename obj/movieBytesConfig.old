@@ -37,7 +37,7 @@
     </source-path>
   </compiler>
   <file-specs>
-    <path-element>C:\workspace\_moviebytes\src\Fix.as</path-element>
+    <path-element>C:\workspace\_moviebytes\src\Main.as</path-element>
   </file-specs>
   <default-background-color>#FFFFFF</default-background-color>
   <default-frame-rate>30</default-frame-rate>

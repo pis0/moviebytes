@@ -210,7 +210,8 @@ package {
 		
 		private var loader:Loader;
 		
-		private function load():void {			
+		private function load():void {				
+			
 			var file:FileReference = new FileReference();
 			file.browse();
 			file.addEventListener(Event.SELECT, function(e:Event):void { 
@@ -231,7 +232,7 @@ package {
 		
 		private function loaderComplete(e:Event):void {
 			
-			output.text = "\nMovieClip Definition Names:\n";	
+			output.text = "\nMovieClip Definition Names:\n";			
 			
 			const dList:Vector.<String> = loader.content.loaderInfo.applicationDomain.getQualifiedDefinitionNames();			
 			var i:uint = 0, //

@@ -1,7 +1,7 @@
 :user_configuration
 
 :: Path to Flex SDK
-set FLEX_SDK=C:\workspace\_airSDKs\19.0.0.241
+set FLEX_SDK=E:\workspace\_airSDKs\23.0.0.257
 
 
 :validation
